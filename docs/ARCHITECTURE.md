@@ -10,6 +10,7 @@ flowchart LR
   Prisma --> Neon["Neon PostgreSQL"]
   API --> OpenRouter["OpenRouter AI"]
   Socket --> Frontend
+  Frontend --> Bluetooth["Web Bluetooth Offline Chat"]
 ```
 
 SignalFlare separates the mobile-first client, HTTP API, realtime socket layer, AI service, and database access. The current local server includes in-memory demo data so the product runs immediately. Production persistence is represented by the Prisma schema and Neon-ready database configuration.
@@ -22,6 +23,7 @@ SignalFlare separates the mobile-first client, HTTP API, realtime socket layer, 
 - React Query for server state
 - Zustand for local operational state
 - Leaflet map integration
+- Web Bluetooth offline chat with local store-and-forward queue
 
 ## Backend
 

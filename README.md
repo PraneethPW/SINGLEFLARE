@@ -31,11 +31,16 @@ signalflare/
 - AI emergency assistant powered by OpenRouter
 - Live incident map and disaster analytics
 - Community and authority communication
+- Offline Bluetooth chat for internet-down scenarios
 - Resource and volunteer coordination
 - Missing person reporting
 - Admin management surface
 - JWT-ready authentication and role based access
 - Realtime notifications with Socket.io
+
+## Offline Bluetooth Chat
+
+The `/offline-chat` module lets responders queue and exchange messages when internet access is unavailable. In supported browsers such as Chrome or Edge, it can pair with BLE UART-compatible Bluetooth devices using the Nordic UART service UUID. If no Bluetooth node is connected, messages are stored locally and marked as queued for store-and-forward use.
 
 ## Production Checklist
 

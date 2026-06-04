@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { Bell, Bot, Boxes, ChartNoAxesCombined, LifeBuoy, Map, RadioTower, Shield, Users, UserSearch } from "lucide-react";
+import { Bell, BluetoothConnected, Bot, Boxes, ChartNoAxesCombined, LifeBuoy, Map, RadioTower, Shield, Users, UserSearch } from "lucide-react";
 import { Button } from "../components/Button";
 import { useAppStore } from "../store/appStore";
 
@@ -9,6 +9,7 @@ const links = [
   { to: "/map", label: "Map", icon: Map },
   { to: "/ai-center", label: "AI", icon: Bot },
   { to: "/community", label: "Community", icon: RadioTower },
+  { to: "/offline-chat", label: "Offline Chat", icon: BluetoothConnected },
   { to: "/resources", label: "Resources", icon: Boxes },
   { to: "/volunteers", label: "Volunteers", icon: Users },
   { to: "/missing-persons", label: "Missing", icon: UserSearch },

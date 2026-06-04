@@ -1,4 +1,5 @@
-import { Megaphone, Mic, Send } from "lucide-react";
+import { BluetoothConnected, Megaphone, Mic, Send } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "../components/Button";
 
 const channels = ["Local Community", "Volunteers", "NGOs", "Authorities"];
@@ -11,7 +12,10 @@ export function Community() {
         {channels.map((channel) => <div key={channel} className="mb-2 rounded-lg bg-white/5 p-3 font-semibold">{channel}</div>)}
       </div>
       <div className="glass rounded-lg p-5">
-        <div className="flex items-center justify-between"><h2 className="text-2xl font-black">Volunteer channel</h2><Megaphone className="text-cyber" /></div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3"><h2 className="text-2xl font-black">Volunteer channel</h2><Megaphone className="text-cyber" /></div>
+          <Link to="/offline-chat"><Button variant="secondary" icon={<BluetoothConnected size={18} />}>Offline Bluetooth Chat</Button></Link>
+        </div>
         <div className="mt-6 space-y-3">
           {messages.map((message) => <div key={message} className="rounded-lg bg-white/5 p-4 text-slate-200">{message}</div>)}
         </div>

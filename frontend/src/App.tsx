@@ -7,6 +7,7 @@ import { SOSPage } from "./pages/SOSPage";
 import { MapPage } from "./pages/MapPage";
 import { AICenter } from "./pages/AICenter";
 import { Community } from "./pages/Community";
+import { OfflineBluetoothChat } from "./pages/OfflineBluetoothChat";
 import { Resources } from "./pages/Resources";
 import { Volunteers } from "./pages/Volunteers";
 import { MissingPersons } from "./pages/MissingPersons";
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/ai-center" element={<AICenter />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/offline-chat" element={<OfflineBluetoothChat />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/volunteers" element={<Volunteers />} />
         <Route path="/missing-persons" element={<MissingPersons />} />
