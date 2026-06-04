@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  Citizen
+  Volunteer
+  NGO
+  Admin
+  FirstResponder
+}
+
+enum Severity {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum EmergencyCategory {
+  Flood
+  Earthquake
+  Fire
+  Cyclone
+  Medical
+  MissingPerson
+  InfrastructureDamage
+}
+
+enum EmergencyStatus {
+  New
+  Triaged
+  Assigned
+  Resolved
+}
+
+enum ResourceType {
+  Food
+  Water
+  Medicine
+  Shelter
+  RescueEquipment
+}
+
+enum ResourceStatus {
+  Available
+  Requested
+  InTransit
+  Distributed
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  role            Role             @default(Citizen)
+  verifiedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  emergencies     Emergency[]
+  messages        Message[]
+  notifications   Notification[]
+  volunteer       Volunteer?
+  reports         Report[]
+  missingPersons  MissingPerson[]
+  aiInteractions  AIInteraction[]
+  auditLogs       AuditLog[]
+}
+
+model Emergency {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  category    EmergencyCategory
+  severity    Severity
+  status      EmergencyStatus   @default(New)
+  latitude    Float
+  longitude   Float
+  photos      String[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  creatorId   String?
+  creator     User?             @relation(fields: [creatorId], references: [id])
+  reports     Report[]
+}
+
+model Resource {
+  id          String         @id @default(cuid())
+  name        String
+  type        ResourceType
+  quantity    Int
+  location    String
+  latitude    Float?
+  longitude   Float?
+  status      ResourceStatus @default(Available)
+  requests    ResourceRequest[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ResourceRequest {
+  id          String   @id @default(cuid())
+  quantity    Int
+  notes       String?
+  status      String   @default("open")
+  resourceId  String
+  resource    Resource @relation(fields: [resourceId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Volunteer {
+  id              String   @id @default(cuid())
+  skills          String[]
+  availability    String
+  currentTask     String?
+  responseScore   Float    @default(0)
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  assignments     VolunteerAssignment[]
+  createdAt       DateTime @default(now())
+}
+
+model VolunteerAssignment {
+  id          String    @id @default(cuid())
+  title       String
+  status      String    @default("assigned")
+  volunteerId String
+  volunteer   Volunteer @relation(fields: [volunteerId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model Channel {
+  id        String    @id @default(cuid())
+  name      String
+  scope     String
+  messages  Message[]
+  createdAt DateTime  @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  body      String
+  mediaUrl  String?
+  authorId  String
+  channelId String
+  author    User     @relation(fields: [authorId], references: [id])
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  type      String
+  readAt    DateTime?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id          String     @id @default(cuid())
+  title       String
+  body        String
+  reporterId  String?
+  emergencyId String?
+  reporter    User?      @relation(fields: [reporterId], references: [id])
+  emergency   Emergency? @relation(fields: [emergencyId], references: [id])
+  createdAt   DateTime   @default(now())
+}
+
+model MissingPerson {
+  id          String   @id @default(cuid())
+  name        String
+  photoUrl    String?
+  details     String
+  lastSeen    String
+  matchScore  Float?
+  reporterId  String?
+  reporter    User?    @relation(fields: [reporterId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model NGO {
+  id          String   @id @default(cuid())
+  name        String
+  contact     String
+  verified    Boolean  @default(false)
+  focusAreas  String[]
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model AIInteraction {
+  id        String   @id @default(cuid())
+  prompt    String
+  response  String
+  feature   String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

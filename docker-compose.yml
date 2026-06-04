@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: signalflare
+      POSTGRES_USER: signalflare
+      POSTGRES_PASSWORD: signalflare
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      PORT: 5153
+      DATABASE_URL: postgresql://signalflare:signalflare@postgres:5432/signalflare
+      JWT_SECRET: local-secret-change-me
+      JWT_REFRESH_SECRET: local-refresh-secret-change-me
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "5153:5153"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:5153/api
+      VITE_SOCKET_URL: http://localhost:5153
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
