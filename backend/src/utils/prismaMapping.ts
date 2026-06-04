@@ -1,4 +1,50 @@
-import type { Emergency, Resource, User, Volunteer, MissingPerson } from "@prisma/client";
+type DbUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+};
+
+type DbEmergency = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  severity: string;
+  status: string;
+  latitude: number;
+  longitude: number;
+  createdAt: Date;
+};
+
+type DbResource = {
+  id: string;
+  name: string;
+  type: string;
+  quantity: number;
+  location: string;
+  status: string;
+  createdAt: Date;
+};
+
+type DbVolunteer = {
+  id: string;
+  skills: string[];
+  availability: string;
+  currentTask: string | null;
+  responseScore: number;
+  createdAt: Date;
+};
+
+type DbMissingPerson = {
+  id: string;
+  name: string;
+  photoUrl: string | null;
+  details: string;
+  lastSeen: string;
+  matchScore: number | null;
+  createdAt: Date;
+};
 
 export function toDbRole(role: string) {
   return role === "First Responder" ? "FirstResponder" : role;
@@ -35,11 +81,11 @@ export function fromDbResourceType(type: string) {
   return type === "RescueEquipment" ? "Rescue Equipment" : type;
 }
 
-export function serializeUser(user: Pick<User, "id" | "name" | "email" | "role">) {
+export function serializeUser(user: DbUser) {
   return { id: user.id, name: user.name, email: user.email, role: fromDbRole(user.role) };
 }
 
-export function serializeEmergency(emergency: Emergency) {
+export function serializeEmergency(emergency: DbEmergency) {
   return {
     id: emergency.id,
     title: emergency.title,
@@ -53,7 +99,7 @@ export function serializeEmergency(emergency: Emergency) {
   };
 }
 
-export function serializeResource(resource: Resource) {
+export function serializeResource(resource: DbResource) {
   return {
     id: resource.id,
     name: resource.name,
@@ -65,7 +111,7 @@ export function serializeResource(resource: Resource) {
   };
 }
 
-export function serializeVolunteer(volunteer: Volunteer & { user: Pick<User, "name" | "email"> }) {
+export function serializeVolunteer(volunteer: DbVolunteer & { user: Pick<DbUser, "name" | "email"> }) {
   return {
     id: volunteer.id,
     name: volunteer.user.name,
@@ -78,7 +124,7 @@ export function serializeVolunteer(volunteer: Volunteer & { user: Pick<User, "na
   };
 }
 
-export function serializeMissingPerson(person: MissingPerson) {
+export function serializeMissingPerson(person: DbMissingPerson) {
   return {
     id: person.id,
     name: person.name,
