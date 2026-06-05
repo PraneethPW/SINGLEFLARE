@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bluetooth, BluetoothConnected, CircleAlert, Radio, Send, ShieldCheck, WifiOff, Zap } from "lucide-react";
+import { Bluetooth, BluetoothConnected, CircleAlert, Info, Radio, Search, Send, ShieldCheck, Smartphone, WifiOff, Zap } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../components/Button";
 
@@ -42,14 +42,15 @@ export function OfflineBluetoothChat() {
   const [deviceName, setDeviceName] = useState("");
   const [status, setStatus] = useState<ChatStatus>(() => (navigator.bluetooth ? "disconnected" : "unsupported"));
   const [error, setError] = useState("");
+  const [lastScannedDevice, setLastScannedDevice] = useState("");
   const writeCharacteristic = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
 
   const supportText = useMemo(() => {
     if (status === "unsupported") return "Web Bluetooth is not available in this browser. Use Chrome or Edge on a Bluetooth-capable device.";
     if (status === "connected") return `Connected to ${deviceName || "Bluetooth responder node"}. Messages will transmit over BLE UART.`;
     if (status === "queued") return "No Bluetooth link is active. Messages are stored locally and ready to forward once paired.";
-    if (status === "pairing") return "Scanning for a nearby SignalFlare or BLE UART device.";
-    return "Pair with a nearby Bluetooth emergency node to chat without internet.";
+    if (status === "pairing") return "Opening the browser Bluetooth picker. Select a nearby BLE responder node, ESP32/nRF device, or another device advertising a chat service.";
+    return "Scan from Chrome or Edge on the laptop. Bluetooth must be on, and the other device must advertise as a BLE peripheral.";
   }, [deviceName, status]);
 
   useEffect(() => {
@@ -70,15 +71,16 @@ export function OfflineBluetoothChat() {
     try {
       setStatus("pairing");
       const device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [UART_SERVICE] }],
+        acceptAllDevices: true,
         optionalServices: [UART_SERVICE]
       });
+      setLastScannedDevice(device.name ?? "Unnamed Bluetooth device");
       const server = await device.gatt?.connect();
       const service = await server?.getPrimaryService(UART_SERVICE);
       const rx = await service?.getCharacteristic(UART_RX_CHARACTERISTIC);
       const tx = await service?.getCharacteristic(UART_TX_CHARACTERISTIC);
 
-      if (!server || !service || !rx || !tx) throw new Error("Selected device does not expose the SignalFlare chat service.");
+      if (!server || !service || !rx || !tx) throw new Error("That device is visible, but it does not expose the SignalFlare BLE chat service. A normal iPhone usually cannot be used directly as a Web Bluetooth chat node.");
 
       writeCharacteristic.current = rx;
       await tx.startNotifications();
@@ -139,10 +141,11 @@ export function OfflineBluetoothChat() {
               </div>
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-300">{supportText}</p>
+            {lastScannedDevice && <p className="mt-2 text-xs text-slate-400">Last selected device: {lastScannedDevice}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={pairDevice} disabled={status === "pairing" || status === "unsupported"} icon={<Bluetooth size={18} />}>
-              {status === "pairing" ? "Pairing..." : "Pair Bluetooth Node"}
+            <Button onClick={pairDevice} disabled={status === "pairing" || status === "unsupported"} icon={<Search size={18} />}>
+              {status === "pairing" ? "Scanning..." : "Scan Nearby Devices"}
             </Button>
             <Button variant="secondary" onClick={clearHistory}>Clear History</Button>
           </div>
@@ -158,6 +161,7 @@ export function OfflineBluetoothChat() {
               {[
                 ["Bluetooth", status === "connected" ? "Connected" : status === "unsupported" ? "Unavailable" : "Ready to pair", Bluetooth],
                 ["Internet", "Not required", WifiOff],
+                ["iPhone direct", "Needs BLE app", Smartphone],
                 ["Store forward", "Enabled", ShieldCheck],
                 ["Emergency mode", "Quick alerts ready", Zap]
               ].map(([label, value, Icon]) => (
@@ -166,6 +170,24 @@ export function OfflineBluetoothChat() {
                   <span className="text-sm font-bold text-white">{String(value)}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="glass rounded-lg p-5">
+            <h3 className="flex items-center gap-2 text-lg font-black"><Info className="text-cyber" /> Why devices may not show</h3>
+            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+              <div className="rounded-lg bg-white/5 p-3">
+                <b className="text-white">Use Chrome or Edge on the laptop.</b>
+                <p className="mt-1">Safari and iPhone browsers do not support Web Bluetooth for this website feature.</p>
+              </div>
+              <div className="rounded-lg bg-white/5 p-3">
+                <b className="text-white">A phone with Bluetooth on is not enough.</b>
+                <p className="mt-1">The other device must advertise as a BLE peripheral with the SignalFlare/Nordic UART chat service.</p>
+              </div>
+              <div className="rounded-lg bg-white/5 p-3">
+                <b className="text-white">For phone-to-laptop chat, use a bridge app/device.</b>
+                <p className="mt-1">Examples: ESP32 BLE UART firmware, nRF Connect peripheral mode, or a custom mobile app that advertises the UART service.</p>
+              </div>
             </div>
           </div>
 
